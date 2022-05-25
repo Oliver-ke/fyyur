@@ -1,7 +1,30 @@
 from datetime import datetime
 from flask_wtf import Form, FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, Length
+
+
+genres = [
+    'Alternative',
+    'Blues',
+    'Classical',
+    'Country',
+    'Electronic',
+    'Folk',
+    'Funk',
+    'Hip-Hop',
+    'Heavy Metal',
+    'Instrumental',
+    'Jazz',
+    'Musical Theatre',
+    'Pop',
+    'Punk',
+    'R&B',
+    'Reggae',
+    'Rock n Roll',
+    'Soul',
+    'Other'
+]
 
 
 class ShowForm(FlaskForm):
@@ -91,8 +114,7 @@ class VenueForm(FlaskForm):
         'image_link'
     )
     genres = SelectMultipleField(
-        # TODO implement enum restriction
-        'genres', validators=[DataRequired()],
+        'genres', validators=[DataRequired(), AnyOf(values=genres)],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -193,14 +215,15 @@ class ArtistForm(FlaskForm):
         ]
     )
     phone = StringField(
-        # TODO implement validation logic for state
-        'phone'
+        'phone',
+        validators=[
+            Length(max=14, message='phone must be less than 14 character')]
     )
     image_link = StringField(
         'image_link'
     )
     genres = SelectMultipleField(
-        'genres', validators=[DataRequired()],
+        'genres', validators=[DataRequired(), AnyOf(values=genres)],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -224,7 +247,6 @@ class ArtistForm(FlaskForm):
         ]
     )
     facebook_link = StringField(
-        # TODO implement enum restriction
         'facebook_link', validators=[URL()]
     )
 

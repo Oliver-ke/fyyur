@@ -13,7 +13,7 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form, FlaskForm
 from forms import *
-from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects.postgresql import ARRAY
 import sys
 #----------------------------------------------------------------------------#
 # App Config.
@@ -22,9 +22,7 @@ import sys
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://kelechi:kelechi96@localhost:5432/fyyur'
 migrate = Migrate(app, db)
 
 #----------------------------------------------------------------------------#
@@ -42,7 +40,7 @@ class Venue(db.Model):
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
-    genres = db.Column(postgresql.ARRAY(db.String()), default=[])
+    genres = db.Column(ARRAY(db.String()), nullable=False, default=[])
     facebook_link = db.Column(db.String(120))
     website_link = db.Column(db.String())
     seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
@@ -59,7 +57,7 @@ class Artist(db.Model):
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
-    genres = db.Column(postgresql.ARRAY(db.String), default=[])
+    genres = db.Column(ARRAY(db.String()), nullable=False, default=[])
     facebook_link = db.Column(db.String(120))
     website_link = db.Column(db.String())
     seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
@@ -265,19 +263,24 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
+    error = False
     try:
         venue = Venue.query.get(venue_id)
         db.session.delete(venue)
         db.session.commit()
     except:
+        error = True
         db.session.rollback()
-        db.session.rollback()
+        print(sys.exc_info())
     finally:
         db.session.close()
 
-    # TODO: BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-    # clicking that button delete it from the db then redirect the user to the homepage
-    return render_template('pages/home.html')
+    if(error):
+        flash('Error, Venue belongs to a show or venue does not exist')
+    else:
+        flash('Venue with id ' + venue_id + ' successfully deleted')
+
+    return redirect(url_for('index'))
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -351,7 +354,6 @@ def show_artist(artist_id):
         "upcoming_shows_count": upcoming_shows_count
     }
 
-    print(artist.genres)  # TODO: fix issue with genres
     return render_template('pages/show_artist.html', artist=data)
 
 #  Update
@@ -367,8 +369,6 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-    # TODO: take values from the form submitted, and update existing
-    # artist record with ID <artist_id> using the new attributes
     form = ArtistForm()
     error = False
 
@@ -463,7 +463,6 @@ def create_artist_submission():
 
     error = False
     data = {}
-    print(genres)
 
     try:
         newArtist = Artist(
