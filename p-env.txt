@@ -1,4 +1,0 @@
-fyyur
-
-exist environment with 
-$ deactivate
