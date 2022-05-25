@@ -341,6 +341,7 @@ def show_artist(artist_id):
         "id": artist.id,
         "name": artist.name,
         "genres": artist.genres,
+        "city": artist.city,
         "state": artist.state,
         "phone": artist.phone,
         "website": artist.website_link,
@@ -362,8 +363,20 @@ def show_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-    form = ArtistForm()
     artist = Artist.query.get(artist_id)
+    defaultVal = {
+        'name': artist.name,
+        'city': artist.city,
+        'state': artist.state,
+        'phone': artist.phone,
+        'image_link': artist.image_link,
+        'genres': artist.genres,
+        'facebook_link': artist.facebook_link,
+        'website_link': artist.website_link,
+        'seeeking_venue': artist.seeking_venue,
+        'seeking_description': artist.seeking_description
+    }
+    form = ArtistForm(data=defaultVal)
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 
@@ -400,8 +413,22 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-    form = VenueForm()
     venue = Venue.query.get(venue_id)
+    defaultVal = {
+        'name': venue.name,
+        'city': venue.city,
+        'state': venue.state,
+        'address': venue.address,
+        'phone': venue.phone,
+        'image_link': venue.image_link,
+        'genres': venue.genres,
+        'facebook_link': venue.facebook_link,
+        'website_link': venue.website_link,
+        'seeking_talent': venue.seeking_talent,
+        'seeking_description': venue.seeking_description
+    }
+    form = VenueForm(data=defaultVal)
+
     return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 
